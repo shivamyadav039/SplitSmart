@@ -1,0 +1,11 @@
+date,description,paid_by,amount,currency,split_type,split_with,split_details,notes
+01-05-2026,Weekend Roadtrip Fuel,Aisha,3500,INR,equal,Aisha;Rohan;Priya,,
+02-05-2026,Highway Dhaba Lunch,rohan,1250,INR,equal,Aisha;Rohan;Priya,,
+02-05-2026,highway dhaba lunch,rohan,1250,INR,equal,Aisha;Rohan;Priya,,
+03-05-2026,Resort Booking,Dev,"5,000",INR,equal,Aisha;Rohan;Priya;Dev,,
+03-05-2026,Snacks and Water,Priya S,450,INR,equal,Aisha;Rohan;Priya,,
+04-05-2026,Amusement Park Entry,Dev,120,USD,equal,Aisha;Rohan;Priya;Dev;Kabir,,
+05-05-2026,Priya paid Rohan back,Priya,1500,INR,,Rohan,,
+06-05-2026,Roadtrip dinner,Aisha,3000,INR,percentage,Aisha;Rohan;Priya,Aisha 40%; Rohan 30%; Priya 40%,
+06-05-2026,Zero cost entry,Sam,0,INR,equal,Aisha;Rohan;Sam,,
+07-05-2026,Post trip coffee,,350,,equal,Aisha;Rohan;Priya,,

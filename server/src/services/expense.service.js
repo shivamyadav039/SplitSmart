@@ -277,3 +277,86 @@ export async function deleteExpense(expenseId) {
   await pool.query('DELETE FROM expenses WHERE id = $1', [expenseId]);
   return { success: true };
 }
+
+export async function exportExpensesToCSV(groupId) {
+  // Check if group exists
+  const groupRes = await pool.query('SELECT name FROM groups WHERE id = $1', [groupId]);
+  if (groupRes.rows.length === 0) {
+    throw new Error('Group not found.');
+  }
+
+  // Fetch all expenses and their splits/metadata
+  const query = `
+    SELECT 
+      e.id,
+      e.expense_date,
+      e.description,
+      u_payer.name as paid_by,
+      e.original_amount as amount,
+      e.original_currency as currency,
+      e.split_type,
+      e.notes,
+      COALESCE(
+        string_agg(u_split.name, ';' ORDER BY u_split.name),
+        ''
+      ) as split_with,
+      COALESCE(
+        string_agg(
+          CASE 
+            WHEN e.split_type = 'percentage' THEN concat(u_split.name, ' ', sm.percentage_value, '%')
+            WHEN e.split_type = 'share' THEN concat(u_split.name, ' ', sm.share_value)
+            WHEN e.split_type = 'unequal' THEN concat(u_split.name, ' ', sm.custom_amount)
+            ELSE NULL
+          END,
+          '; ' ORDER BY u_split.name
+        ),
+        ''
+      ) as split_details
+    FROM expenses e
+    JOIN users u_payer ON u_payer.id = e.paid_by
+    JOIN expense_splits es ON es.expense_id = e.id
+    JOIN users u_split ON u_split.id = es.user_id
+    LEFT JOIN split_metadata sm ON sm.expense_id = e.id AND sm.user_id = es.user_id
+    WHERE e.group_id = $1
+    GROUP BY e.id, e.expense_date, e.description, u_payer.name, e.original_amount, e.original_currency, e.split_type, e.notes, e.created_at
+    ORDER BY e.expense_date ASC, e.created_at ASC
+  `;
+
+  const res = await pool.query(query, [groupId]);
+  
+  // Format as CSV
+  const headers = ['date', 'description', 'paid_by', 'amount', 'currency', 'split_type', 'split_with', 'split_details', 'notes'];
+  const csvRows = [headers.join(',')];
+
+  res.rows.forEach(row => {
+    // Format date as YYYY-MM-DD
+    const d = new Date(row.expense_date);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    // Escaping commas and quotes in CSV fields
+    const escapeCsv = (str) => {
+      if (str === null || str === undefined) return '';
+      const text = String(str);
+      if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+
+    const line = [
+      dateStr,
+      escapeCsv(row.description),
+      escapeCsv(row.paid_by),
+      row.amount,
+      row.currency,
+      row.split_type,
+      escapeCsv(row.split_with),
+      escapeCsv(row.split_details),
+      escapeCsv(row.notes)
+    ];
+    csvRows.push(line.join(','));
+  });
+
+  return csvRows.join('\n');
+}
+

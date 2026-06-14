@@ -97,6 +97,26 @@ export const GroupDetail = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const res = await api.get(`/groups/${groupId}/expenses/export`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([res.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${group?.name || 'group'}_expenses_export.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting expenses CSV:', err);
+    }
+  };
+
+
   // Full reload wrapper
   const handleReloadData = async () => {
     await fetchGroupDetails();
@@ -291,11 +311,18 @@ export const GroupDetail = () => {
             {(filterMember || filterStart || filterEnd) && (
               <button
                 onClick={() => { setFilterMember(''); setFilterStart(''); setFilterEnd(''); setPage(1); }}
-                className="text-[11px] text-[#06B6D4] hover:underline ml-auto"
+                className="text-[11px] text-[#06B6D4] hover:underline mr-4"
               >
                 Reset Filters
               </button>
             )}
+
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center space-x-1.5 px-3 py-1 rounded bg-[#06B6D4]/10 hover:bg-[#06B6D4]/20 border border-[#06B6D4]/20 text-xs font-semibold text-[#06B6D4] ml-auto transition-colors"
+            >
+              <span>Export CSV</span>
+            </button>
           </div>
 
           {/* Expenses chronological listing */}

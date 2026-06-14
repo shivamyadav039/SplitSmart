@@ -15,5 +15,7 @@ router.delete('/:id/members/:userId', authMiddleware, groupsController.deleteMem
 router.get('/:groupId/expenses', authMiddleware, expensesController.getExpenses);
 router.get('/:groupId/balances', authMiddleware, expensesController.getBalances);
 router.get('/:groupId/expenses/audit/:userId', authMiddleware, expensesController.getAuditTrail);
+router.get('/:groupId/expenses/export', authMiddleware, expensesController.exportCSV);
 
 export default router;
+

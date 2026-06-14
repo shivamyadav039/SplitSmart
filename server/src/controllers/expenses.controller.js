@@ -40,3 +40,15 @@ export async function getAuditTrail(req, res, next) {
     next(error);
   }
 }
+
+export async function exportCSV(req, res, next) {
+  try {
+    const csvContent = await expenseService.exportExpensesToCSV(req.params.groupId);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="expenses_export.csv"');
+    res.status(200).send(csvContent);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+

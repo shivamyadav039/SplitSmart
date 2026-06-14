@@ -1,5 +1,5 @@
 # --- Stage 1: Build the Vite React Frontend ---
-FROM node:18-alpine AS client-builder
+FROM node:20-alpine AS client-builder
 WORKDIR /app
 
 # Install client dependencies
@@ -11,7 +11,7 @@ COPY client/ ./client/
 RUN npm run build --prefix client
 
 # --- Stage 2: Run the Node.js Express Server ---
-FROM node:18-alpine AS server-runner
+FROM node:20-alpine AS server-runner
 WORKDIR /app
 ENV NODE_ENV=production
 

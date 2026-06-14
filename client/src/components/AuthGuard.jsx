@@ -12,8 +12,8 @@ export const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0B1020]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent border-[#8B5CF6]"></div>
+      <div className="flex h-screen items-center justify-center bg-[#F6F6F6]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent border-[#1CC29F]"></div>
       </div>
     );
   }
@@ -36,8 +36,8 @@ export const PublicRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0B1020]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent border-[#8B5CF6]"></div>
+      <div className="flex h-screen items-center justify-center bg-[#F6F6F6]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent border-[#1CC29F]"></div>
       </div>
     );
   }

@@ -22,6 +22,7 @@ export const Dashboard = () => {
   const [owesList, setOwesList] = useState([]);
 
   const fetchDashboardData = async () => {
+    if (!user || !user.id) return;
     try {
       const groupsRes = await api.get('/groups');
       const groupsData = groupsRes.data.groups;
@@ -226,18 +227,68 @@ export const Dashboard = () => {
           </div>
 
           {groups.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center space-y-4 shadow-sm">
-              <CreditCard className="mx-auto text-gray-400" size={48} />
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-gray-800">No active groups</h3>
-                <p className="text-sm text-gray-500">Create a group to start adding and splitting flatmate bills.</p>
+            <div className="space-y-6 animate-fade-in-up">
+              {/* Premium Welcome Onboarding Banner */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row items-center gap-6">
+                <div className="space-y-3 text-center md:text-left md:w-2/3">
+                  <h3 className="text-xl font-bold text-gray-900 font-sans">Welcome to ExpenseSync!</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed font-sans">
+                    It looks like you haven't joined any shared expense groups yet. Get started in seconds by initializing a new flat group, or importing your historical spreadsheet.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                    <button
+                      onClick={() => setShowCreateGroup(true)}
+                      className="px-5 py-2.5 bg-[#1CC29F] hover:bg-[#19b896] text-white font-bold rounded-xl shadow-sm hover-lift text-xs cursor-pointer"
+                    >
+                      Initialize Group
+                    </button>
+                    <Link
+                      to="/import"
+                      className="px-5 py-2.5 border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-xl text-xs hover-lift transition-colors"
+                    >
+                      Import CSV File
+                    </Link>
+                  </div>
+                </div>
+                <div className="md:w-1/3 flex justify-center">
+                  <div className="w-24 h-24 rounded-2xl bg-[#1CC29F]/10 flex items-center justify-center text-[#1CC29F]">
+                    <Sparkles size={48} className="animate-pulse" />
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => setShowCreateGroup(true)}
-                className="px-5 py-2.5 bg-[#1CC29F] hover:bg-[#19b896] text-white font-bold rounded-lg hover-lift cursor-pointer text-xs"
-              >
-                Create Group
-              </button>
+
+              {/* Step-by-Step Onboarding Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#1CC29F]/10 flex items-center justify-center font-bold text-sm text-[#1CC29F]">
+                    1
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-800">Create a Group</h4>
+                  <p className="text-xs text-gray-500">
+                    Group your flatmates, trip friends, or partners into distinct shared workspaces.
+                  </p>
+                </div>
+                
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#1CC29F]/10 flex items-center justify-center font-bold text-sm text-[#1CC29F]">
+                    2
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-800">Invite Members</h4>
+                  <p className="text-xs text-gray-500">
+                    Add members with custom active periods to keep balance math historically accurate.
+                  </p>
+                </div>
+
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#1CC29F]/10 flex items-center justify-center font-bold text-sm text-[#1CC29F]">
+                    3
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-800">Add Expenses</h4>
+                  <p className="text-xs text-gray-500">
+                    Enter shared bills or upload a CSV. The system auto-calculates dynamic net balances.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -2,6 +2,10 @@
   "name": "expensesync-root",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "install:all": "npm install --prefix client && npm install --prefix server",
     "dev": "npm run dev:server & npm run dev:client",
@@ -9,7 +13,7 @@
     "dev:client": "npm run --prefix client dev",
     "build:client": "npm run --prefix client build",
     "start:server": "npm run --prefix server start",
-    "build": "npm run install:all && npm run build:client",
+    "build": "npm run build:client",
     "start": "npm run --prefix server migrate && npm run start:server",
     "seed": "npm run --prefix server seed"
   }

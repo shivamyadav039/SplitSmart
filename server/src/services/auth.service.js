@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db/pool.js';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'splitsmart_default_jwt_secret_token_key_12345';
+
 export async function registerUser(name, email, password) {
   // Validate presence
   if (!name || !email || !password) {
@@ -32,7 +34,7 @@ export async function registerUser(name, email, password) {
   // Sign JWT
   const token = jwt.sign(
     { id: user.id, name: user.name, email: user.email },
-    process.env.JWT_SECRET,
+    JWT_SECRET,
     { expiresIn: '24h' }
   );
 
@@ -64,7 +66,7 @@ export async function loginUser(email, password) {
   // Sign JWT
   const token = jwt.sign(
     { id: user.id, name: user.name, email: user.email },
-    process.env.JWT_SECRET,
+    JWT_SECRET,
     { expiresIn: '24h' }
   );
 

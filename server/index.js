@@ -14,13 +14,16 @@ import importRouter from './src/routes/import.routes.js';
 // Import error middleware
 import { errorMiddleware } from './src/middleware/error.middleware.js';
 import { runMigrations } from './src/db/migrate.js';
+import { seed } from './src/db/seed.js';
 
 dotenv.config();
 
-// Run database migrations asynchronously on startup
-runMigrations().catch((err) => {
-  console.error('Database migration failed on startup:', err.message);
-});
+// Run database migrations and seed asynchronously on startup
+runMigrations()
+  .then(() => seed())
+  .catch((err) => {
+    console.error('Database setup failed on startup:', err.message);
+  });
 
 const app = express();
 const PORT = process.env.PORT || 5000;

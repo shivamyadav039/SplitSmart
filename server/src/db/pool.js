@@ -15,10 +15,26 @@ if (!connectionString) {
 const cleanConnectionString = connectionString.split('?')[0];
 const useSSL = !cleanConnectionString.includes('localhost') && !cleanConnectionString.includes('127.0.0.1') && !cleanConnectionString.includes('::1');
 
-export const pool = new Pool({
-  connectionString: cleanConnectionString,
-  ssl: useSSL ? { rejectUnauthorized: false } : false,
-});
+let poolConfig = {};
+
+if (useSSL) {
+  const dbUrl = new URL(connectionString);
+  poolConfig = {
+    host: dbUrl.hostname,
+    port: dbUrl.port || 5432,
+    database: dbUrl.pathname.slice(1),
+    user: dbUrl.username,
+    password: decodeURIComponent(dbUrl.password),
+    ssl: { rejectUnauthorized: false },
+  };
+} else {
+  poolConfig = {
+    connectionString: cleanConnectionString,
+    ssl: false,
+  };
+}
+
+export const pool = new Pool(poolConfig);
 
 // Test database connection on startup
 pool

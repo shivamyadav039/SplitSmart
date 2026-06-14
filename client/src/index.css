@@ -1,0 +1,168 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: #F2F2F2;
+  color: #333333;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility card overrides to clean ExpenseSync Light Theme */
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.glass-modal {
+  background: #ffffff;
+  border: 1px solid #CCCCCC;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #EEEEEE;
+}
+::-webkit-scrollbar-thumb {
+  background: #CCCCCC;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BBBBBB;
+}
+
+/* Direct light mode text visibility helper overrides for Tailwind dark-mode classes */
+.text-white {
+  color: #333333 !important;
+}
+.text-gray-200 {
+  color: #444444 !important;
+}
+.text-gray-300 {
+  color: #555555 !important;
+}
+.text-gray-400 {
+  color: #666666 !important;
+}
+.text-gray-500 {
+  color: #777777 !important;
+}
+
+/* Accent overrides for ExpenseSync Teal #1CC29F */
+.bg-gradient-to-r.from-\[\#8B5CF6\].to-\[\#06B6D4\] {
+  background: #1CC29F !important;
+}
+.bg-gradient-to-r.from-\[\#8B5CF6\].to-\[\#7C3AED\] {
+  background: #1CC29F !important;
+}
+.text-\[\#06B6D4\] {
+  color: #1CC29F !important;
+}
+.text-\[\#8B5CF6\] {
+  color: #19B896 !important;
+}
+.border-\[\#06B6D4\] {
+  border-color: #1CC29F !important;
+}
+
+/* Inputs light styling overrides */
+input, select, textarea {
+  background-color: #FFFFFF !important;
+  border-color: #D1D5DB !important;
+  color: #333333 !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #1CC29F !important;
+  outline: none;
+}
+input::placeholder {
+  color: #9CA3AF !important;
+}
+option {
+  background-color: #FFFFFF !important;
+  color: #333333 !important;
+}
+
+/* Buttons style overrides */
+button.bg-gradient-to-r {
+  background: #1CC29F !important;
+  color: #FFFFFF !important;
+}
+button.bg-gradient-to-r:hover {
+  background: #19B896 !important;
+  opacity: 1 !important;
+}
+button.text-gray-400:hover {
+  color: #333333 !important;
+}
+
+/* Form background cards */
+form.glass-card {
+  background: #ffffff !important;
+}
+
+/* --- Professional Animations & Micro-interactions --- */
+
+/* 1. Page/Card Fade-In Slide-Up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. Tactile Hover Lift for Cards & Buttons */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.2s ease, 
+              border-color 0.2s ease !important;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.hover-lift:active {
+  transform: translateY(0);
+}
+
+/* 3. Subtle logo hover animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-float:hover {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* 4. Tab fade transition */
+.tab-panel-transition {
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+

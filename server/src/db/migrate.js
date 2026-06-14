@@ -17,10 +17,16 @@ async function migrate() {
     console.log('Database tables successfully created!');
   } catch (error) {
     console.error('Migration failed:', error);
-    process.exit(1);
+    throw error;
   }
 }
 
-migrate().then(() => {
-  pool.end();
-});
+// Only run immediately if executed directly via CLI
+const isDirectRun = process.argv[1] && (process.argv[1].endsWith('migrate.js') || process.argv[1].endsWith('migrate'));
+if (isDirectRun) {
+  runMigrations().then(() => {
+    pool.end();
+  }).catch(() => {
+    process.exit(1);
+  });
+}

@@ -13,8 +13,14 @@ import importRouter from './src/routes/import.routes.js';
 
 // Import error middleware
 import { errorMiddleware } from './src/middleware/error.middleware.js';
+import { runMigrations } from './src/db/migrate.js';
 
 dotenv.config();
+
+// Run database migrations asynchronously on startup
+runMigrations().catch((err) => {
+  console.error('Database migration failed on startup:', err.message);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;

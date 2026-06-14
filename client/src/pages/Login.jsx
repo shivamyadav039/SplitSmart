@@ -89,8 +89,8 @@ export const Login = () => {
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight text-white/95">
-            Less stress when <br />
-            sharing expenses <br />
+            Split the damage, <br />
+            keep the vibes <br />
             <span className={`inline-block transition-all duration-500 transform ${activeWord.color}`}>
               {activeWord.text}
             </span>

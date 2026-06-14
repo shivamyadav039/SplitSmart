@@ -116,8 +116,8 @@ export const Home = () => {
           <div className="space-y-8 animate-fade-in-up">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                Less stress when <br />
-                sharing expenses <br />
+                Split the damage, <br />
+                keep the vibes <br />
                 <span className={`inline-block transition-all duration-500 transform ${activeWord.color}`}>
                   {activeWord.text}
                 </span>

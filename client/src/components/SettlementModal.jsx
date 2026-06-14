@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import { X, Send, CreditCard } from 'lucide-react';
 
-export const SettlementModal = ({ groupId, members, currentUser, targetUser, onClose, onSuccess }) => {
+export const SettlementModal = ({ groupId: initialGroupId, members: initialMembers, currentUser, targetUser, onClose, onSuccess }) => {
+  const [groups, setGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId || '');
+  const [groupMembers, setGroupMembers] = useState(initialMembers || []);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
   const [paidBy, setPaidBy] = useState(currentUser?.id || '');
   const [paidTo, setPaidTo] = useState(targetUser?.user_id || '');
   const [amount, setAmount] = useState('');
@@ -11,12 +17,86 @@ export const SettlementModal = ({ groupId, members, currentUser, targetUser, onC
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch groups if not provided
+  useEffect(() => {
+    if (!initialGroupId) {
+      const fetchGroups = async () => {
+        setLoadingGroups(true);
+        try {
+          const res = await api.get('/groups');
+          setGroups(res.data.groups || []);
+          if (res.data.groups && res.data.groups.length > 0) {
+            setSelectedGroupId(res.data.groups[0].id);
+          }
+        } catch (err) {
+          console.error('Failed to fetch groups:', err);
+          setError('Failed to load groups.');
+        } finally {
+          setLoadingGroups(false);
+        }
+      };
+      fetchGroups();
+    }
+  }, [initialGroupId]);
+
+  // Fetch members when group changes
+  useEffect(() => {
+    if (selectedGroupId && !initialMembers) {
+      const fetchMembers = async () => {
+        setLoadingMembers(true);
+        try {
+          const res = await api.get(`/groups/${selectedGroupId}/members`);
+          setGroupMembers(res.data.members || []);
+        } catch (err) {
+          console.error('Failed to fetch members:', err);
+          setError('Failed to load group members.');
+        } finally {
+          setLoadingMembers(false);
+        }
+      };
+      fetchMembers();
+    }
+  }, [selectedGroupId, initialMembers]);
+
+  // Set paidBy default when groupMembers change
+  useEffect(() => {
+    if (groupMembers.length > 0) {
+      const isCurrentUserInGroup = groupMembers.some(m => m.user_id === currentUser?.id);
+      if (isCurrentUserInGroup) {
+        setPaidBy(currentUser.id);
+      } else {
+        setPaidBy(groupMembers[0].user_id);
+      }
+    }
+  }, [groupMembers, currentUser]);
+
+  // Set paidTo default when paidBy or groupMembers change
+  useEffect(() => {
+    if (groupMembers.length > 0) {
+      const remaining = groupMembers.filter(m => m.user_id !== paidBy);
+      if (remaining.length > 0) {
+        const isTargetInGroup = remaining.some(m => m.user_id === targetUser?.user_id);
+        if (isTargetInGroup && paidBy !== targetUser?.user_id) {
+          setPaidTo(targetUser.user_id);
+        } else {
+          setPaidTo(remaining[0].user_id);
+        }
+      } else {
+        setPaidTo('');
+      }
+    }
+  }, [paidBy, groupMembers, targetUser]);
+
   // Automatically filter recipient list to exclude the selected payer
-  const filteredRecipients = members.filter(m => m.user_id !== paidBy);
+  const filteredRecipients = groupMembers.filter(m => m.user_id !== paidBy);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!selectedGroupId) {
+      return setError('Please select a group.');
+    }
     
     if (!paidBy || !paidTo || !amount || !paymentDate) {
       return setError('Please fill in all required fields.');
@@ -30,7 +110,7 @@ export const SettlementModal = ({ groupId, members, currentUser, targetUser, onC
     setLoading(true);
     try {
       await api.post('/payments', {
-        groupId,
+        groupId: selectedGroupId,
         paidBy,
         paidTo,
         amount: numericAmount,
@@ -48,8 +128,8 @@ export const SettlementModal = ({ groupId, members, currentUser, targetUser, onC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-      <div className="glass-modal w-full max-w-md rounded-2xl p-6 space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="glass-modal w-full max-w-md rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <h3 className="text-lg font-bold text-white flex items-center space-x-2">
             <CreditCard className="text-[#06B6D4]" size={20} />
             <span>Settle Debt / Payment</span>
@@ -66,6 +146,27 @@ export const SettlementModal = ({ groupId, members, currentUser, targetUser, onC
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!initialGroupId && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Select Group</label>
+              {loadingGroups ? (
+                <div className="text-xs text-gray-400 animate-pulse">Loading groups...</div>
+              ) : (
+                <select
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#06B6D4] transition-colors"
+                >
+                  <option value="" disabled className="bg-[#0f172a]">Choose a group...</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id} className="bg-[#0f172a]">
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
           {/* Payer Dropdown */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">

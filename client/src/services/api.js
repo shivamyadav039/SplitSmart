@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Vite environment API URL fallback to port 5000 in dev
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Vite environment API URL fallback to port 5001 in dev and relative /api in prod
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5001/api');
 
 const api = axios.create({
   baseURL: API_URL,

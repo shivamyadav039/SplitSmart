@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import { X, Plus, Info } from 'lucide-react';
 
-export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess }) => {
+export const ExpenseModal = ({ groupId: initialGroupId, members: initialMembers, currentUser, onClose, onSuccess }) => {
+  const [groups, setGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId || '');
+  const [groupMembers, setGroupMembers] = useState(initialMembers || []);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('INR');
@@ -19,10 +25,51 @@ export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess
   // Track split inputs: maps userId -> { selected: bool, percentage: num, shares: num, customAmount: num }
   const [splitConfig, setSplitConfig] = useState({});
 
+  // Fetch groups if not provided
+  useEffect(() => {
+    if (!initialGroupId) {
+      const fetchGroups = async () => {
+        setLoadingGroups(true);
+        try {
+          const res = await api.get('/groups');
+          setGroups(res.data.groups || []);
+          if (res.data.groups && res.data.groups.length > 0) {
+            setSelectedGroupId(res.data.groups[0].id);
+          }
+        } catch (err) {
+          console.error('Failed to fetch groups:', err);
+          setError('Failed to load groups. Please try again.');
+        } finally {
+          setLoadingGroups(false);
+        }
+      };
+      fetchGroups();
+    }
+  }, [initialGroupId]);
+
+  // Fetch members when group changes
+  useEffect(() => {
+    if (selectedGroupId && !initialMembers) {
+      const fetchMembers = async () => {
+        setLoadingMembers(true);
+        try {
+          const res = await api.get(`/groups/${selectedGroupId}/members`);
+          setGroupMembers(res.data.members || []);
+        } catch (err) {
+          console.error('Failed to fetch members:', err);
+          setError('Failed to load group members.');
+        } finally {
+          setLoadingMembers(false);
+        }
+      };
+      fetchMembers();
+    }
+  }, [selectedGroupId, initialMembers]);
+
   useEffect(() => {
     // Filter members active on selected date
     const selectedDate = new Date(expenseDate);
-    const active = members.filter(m => {
+    const active = groupMembers.filter(m => {
       const joined = new Date(m.joined_at);
       const left = m.left_at ? new Date(m.left_at) : null;
       return joined <= selectedDate && (!left || left >= selectedDate);
@@ -50,7 +97,7 @@ export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess
     });
     setSplitConfig(newConfig);
 
-  }, [expenseDate, members]);
+  }, [expenseDate, groupMembers]);
 
   const toggleSelectMember = (userId) => {
     setSplitConfig(prev => ({
@@ -75,6 +122,10 @@ export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!selectedGroupId) {
+      return setError('Please select a group first.');
+    }
 
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -133,7 +184,7 @@ export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess
     setLoading(true);
     try {
       await api.post('/expenses', {
-        groupId,
+        groupId: selectedGroupId,
         description,
         amount: numericAmount,
         currency,
@@ -171,6 +222,28 @@ export const ExpenseModal = ({ groupId, members, currentUser, onClose, onSuccess
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold text-center">
               {error}
+            </div>
+          )}
+
+          {!initialGroupId && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Select Group</label>
+              {loadingGroups ? (
+                <div className="text-xs text-gray-400 animate-pulse">Loading groups...</div>
+              ) : (
+                <select
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                  className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#06B6D4] transition-colors"
+                >
+                  <option value="" disabled className="bg-[#0f172a]">Choose a group...</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id} className="bg-[#0f172a]">
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
 

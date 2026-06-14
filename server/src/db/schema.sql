@@ -1,18 +1,8 @@
 -- Enable pgcrypto extension for gen_random_uuid() if not enabled
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Drop existing tables to ensure a clean slate during seeding/setup
-DROP TABLE IF EXISTS import_logs CASCADE;
-DROP TABLE IF EXISTS payments CASCADE;
-DROP TABLE IF EXISTS split_metadata CASCADE;
-DROP TABLE IF EXISTS expense_splits CASCADE;
-DROP TABLE IF EXISTS expenses CASCADE;
-DROP TABLE IF EXISTS group_memberships CASCADE;
-DROP TABLE IF EXISTS groups CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
 -- Users Table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -21,7 +11,7 @@ CREATE TABLE users (
 );
 
 -- Groups Table
-CREATE TABLE groups (
+CREATE TABLE IF NOT EXISTS groups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -29,7 +19,7 @@ CREATE TABLE groups (
 );
 
 -- Group Memberships Table
-CREATE TABLE group_memberships (
+CREATE TABLE IF NOT EXISTS group_memberships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -39,7 +29,7 @@ CREATE TABLE group_memberships (
 );
 
 -- Expenses Table
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     description VARCHAR(255) NOT NULL,
@@ -56,7 +46,7 @@ CREATE TABLE expenses (
 );
 
 -- Expense Splits Table
-CREATE TABLE expense_splits (
+CREATE TABLE IF NOT EXISTS expense_splits (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     expense_id UUID NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -66,7 +56,7 @@ CREATE TABLE expense_splits (
 );
 
 -- Split Metadata Table
-CREATE TABLE split_metadata (
+CREATE TABLE IF NOT EXISTS split_metadata (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     expense_id UUID NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -78,7 +68,7 @@ CREATE TABLE split_metadata (
 );
 
 -- Payments Table (Settlements)
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     paid_by UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
@@ -91,7 +81,7 @@ CREATE TABLE payments (
 );
 
 -- Import Logs Table
-CREATE TABLE import_logs (
+CREATE TABLE IF NOT EXISTS import_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     row_number INTEGER NOT NULL,
     problem_type VARCHAR(255) NOT NULL,

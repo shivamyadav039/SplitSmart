@@ -31,3 +31,22 @@ export async function getMe(req, res, next) {
     next(error);
   }
 }
+
+export async function getUsers(req, res, next) {
+  try {
+    const users = await authService.getAllUsers();
+    res.status(200).json({ users });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createUser(req, res, next) {
+  try {
+    const { name, email } = req.body;
+    const user = await authService.createUser(name, email);
+    res.status(201).json({ user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}

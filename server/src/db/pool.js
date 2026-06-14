@@ -7,6 +7,11 @@ const { Pool } = pg;
 
 const connectionString = process.env.DATABASE_URL;
 
+if (!connectionString) {
+  console.error('FATAL ERROR: DATABASE_URL environment variable is not defined!');
+  process.exit(1);
+}
+
 export const pool = new Pool({
   connectionString,
   // For production environments like Render, self-signed certificates might be required.

@@ -12,12 +12,12 @@ if (!connectionString) {
   process.exit(1);
 }
 
+const cleanConnectionString = connectionString.split('?')[0];
+const useSSL = !cleanConnectionString.includes('localhost') && !cleanConnectionString.includes('127.0.0.1') && !cleanConnectionString.includes('::1');
+
 export const pool = new Pool({
-  connectionString,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+  connectionString: cleanConnectionString,
+  ssl: useSSL ? { rejectUnauthorized: false } : false,
 });
 
 // Test database connection on startup

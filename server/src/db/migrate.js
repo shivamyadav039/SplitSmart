@@ -6,7 +6,7 @@ import { pool } from './pool.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function migrate() {
+export async function runMigrations() {
   console.log('Running database migrations...');
   try {
     const schemaPath = path.join(__dirname, 'schema.sql');

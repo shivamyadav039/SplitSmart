@@ -155,3 +155,46 @@ Our scanner analyzes every row and classifies issues as **Errors** (blocking row
 13. **Zero Amount (Warning):** Value is `0`. Skipped or imported as zero-value log.
 14. **Membership Active Timeline (Warning):** Participant was inactive on the expense date. Excluded from split.
 15. **Split Details on Equal Split (Warning):** Split type is equal but weights provided. Auto-ignored.
+
+---
+
+## 4. Technology Stack & Architecture
+
+ExpenseSync is designed as a modular 3-tier web application to guarantee high scalability, loose coupling, and transaction-safe operations.
+
+### Frontend (Client-side)
+* **React SPA (v18)** — Declarative UI component management.
+* **Vite** — High-performance frontend toolchain for rapid hot-reloading.
+* **Tailwind CSS** — Sleek Light Mode style configuration matching the official Splitwise Teal theme.
+* **Lucide React** — Lightweight SVG iconography.
+* **Axios** — Async HTTP client for handling unified headers, parsing responses, and token authentication.
+
+### Backend (Server-side)
+* **Node.js (v20+)** — High-performance JavaScript runtime environment.
+* **Express.js** — Lightweight MVC routing framework for REST API endpoints.
+* **csv-parser** — Stream-based processor for fast chunked CSV parsing.
+* **multer** — Node.js multipart form-data middleware for file upload handling.
+* **bcryptjs** — High-entropy password hashing for secure authentication.
+* **jsonwebtoken (JWT)** — Stateless authorization session keys.
+
+### Database & Security
+* **PostgreSQL** — Advanced open-source relational database storing ledger states.
+* **pg (node-postgres)** — Client connection pool driver supporting transactions (`BEGIN`, `COMMIT`, `ROLLBACK`).
+* **pgcrypto** — Cryptographic database extensions for native UUID generation.
+
+### Verification & Testing
+* **Vitest** — Modern unit testing suite for backend mathematical split invariants.
+* **Supertest / Fetch Scripts** — Automated end-to-end transaction validation tools.
+
+---
+
+## 5. Development Roadmap & Remaining Features
+
+To transition this MVP to a fully commercialized application, the following architectural enhancements are scheduled:
+
+- [ ] **Dynamic Live Exchange Rates API**: Replace the static fixed snapshot ($1 USD = 84 INR$) with a real-time scheduler fetching live rates from an currency API (e.g. OpenExchangeRates).
+- [ ] **AI-Powered OCR Receipt Scanning**: Integrate Tesseract OCR or Google Cloud Vision API to automatically scan uploaded receipt images and populate the "+ Add Expense" form fields.
+- [ ] **Recharts Spending Visualizations**: Build interactive dashboard analytics including spending breakups (category distribution), personal cumulative balance history over time, and monthly expense trends.
+- [ ] **Stripe / Razorpay Settlement Sandbox**: Implement a direct "Settle Up" trigger allowing flatmates to execute payments electronically within the app using UPI or Cards.
+- [ ] **Real-time Push Notifications**: Use WebSockets (Socket.io) or WebPush to alert members instantly when expenses are added, settlements are recorded, or when they are added to a new flatmates group.
+

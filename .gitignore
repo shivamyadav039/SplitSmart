@@ -39,3 +39,6 @@ build/
 .agents/
 .antigravity/
 .gemini/
+
+# Lockfiles (prevent cross-platform binary module issues on deploy)
+package-lock.json

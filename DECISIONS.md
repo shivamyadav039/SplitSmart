@@ -43,3 +43,28 @@ This log tracks every significant product and technical decision, the options co
   2. Multi-route SPA using React Router v6 with explicit pages (Dashboard, Groups, Importer, Profile).
 - **Decision:** Option 2 (Multi-route SPA).
 - **Reasoning:** Better separation of concerns, simplifies CSV importer walkthrough and report preview, separates overall balance summaries from group-level operations, and tracks membership timelines cleanly.
+
+### DECISION-006: Serverless Monorepo Deployment on Vercel
+- **Context:** Deploying the monorepo to production with static assets and API routing.
+- **Options Considered:**
+  1. Render/Railway VM hosting (as originally planned).
+  2. Vercel Serverless Function (Express monolith mapped to `/api/*`) + CDN static hosting.
+- **Decision:** Option 2 (Vercel Serverless Deployment).
+- **Reasoning:** Vercel offers high-speed global static asset caching and frictionless deployment pipelines. By wrapping Express under a single monolithic handler file (`api/index.js`) and using a `vercel.json` rewrite rule, we avoid CORS issues and VM hosting costs while matching the timeline perfectly.
+
+### DECISION-007: Real-Time Chat using Client-Side Short Polling
+- **Context:** Implement user chat within an expense with real-time sync, restricted to relational databases only.
+- **Options Considered:**
+  1. WebSockets/Socket.io (Stateful sockets).
+  2. Server-Sent Events (SSE).
+  3. Client-side Short Polling (HTTP request every 3 seconds).
+- **Decision:** Option 3 (Client-side Short Polling against PostgreSQL tables).
+- **Reasoning:** Since Vercel Serverless Functions are ephemeral and stateless, they cannot maintain persistent long-lived TCP sockets (WebSockets) or connections. Client-side short polling queries a relational database table (`expense_comments`) via stateless REST API endpoints, matching our deployment runtime constraints and fulfilling the user's relational database criteria without stateful servers or Redis messaging brokers.
+
+### DECISION-008: Decoupling Database Migrations from Serverless Cold Starts
+- **Context:** Database migrations were originally run asynchronously inside the Express startup sequence.
+- **Options Considered:**
+  1. Keep running migrations asynchronously at the module level on startup.
+  2. Comment out runtime startup migrations and execute them via manual CLI commands or Vercel build phase scripts.
+- **Decision:** Option 2 (Decoupling migrations).
+- **Reasoning:** In Vercel serverless environments, module-level background promises can be frozen mid-execution as soon as the initial request returns, causing incomplete table structures. Concurrent container launches under load also cause race conditions where multiple instances attempt migrations, causing table lockups. Running migrations manually via `npm run migrate` or in deployment pipelines ensures transaction safety.

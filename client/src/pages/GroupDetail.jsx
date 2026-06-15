@@ -5,9 +5,10 @@ import api from '../services/api.js';
 import { ExpenseModal } from '../components/ExpenseModal.jsx';
 import { SettlementModal } from '../components/SettlementModal.jsx';
 import { AuditTrailModal } from '../components/AuditTrailModal.jsx';
+import { ExpenseChatModal } from '../components/ExpenseChatModal.jsx';
 import { 
   PlusCircle, CreditCard, Users, History, Calendar, 
-  ArrowLeft, Eye, Filter, RefreshCw, CheckCircle2 
+  ArrowLeft, Eye, Filter, RefreshCw, CheckCircle2, MessageSquare
 } from 'lucide-react';
 
 export const GroupDetail = () => {
@@ -39,6 +40,8 @@ export const GroupDetail = () => {
   const [showSettlementModal, setShowSettlementModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState(null); // { user_id, name }
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatExpense, setChatExpense] = useState(null);
 
   // Add/Edit member form
   const [showAddMember, setShowAddMember] = useState(false);
@@ -367,6 +370,16 @@ export const GroupDetail = () => {
                         </div>
                       )}
                       <div className="text-[10px] text-gray-400 capitalize">Split: {exp.split_type}</div>
+                      <button
+                        onClick={() => {
+                          setChatExpense(exp);
+                          setShowChatModal(true);
+                        }}
+                        className="mt-1.5 text-[10px] text-[#06B6D4] hover:underline font-bold flex items-center justify-end space-x-1 ml-auto cursor-pointer"
+                      >
+                        <MessageSquare size={12} />
+                        <span>Chat</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -663,6 +676,18 @@ export const GroupDetail = () => {
           onClose={() => {
             setShowAuditModal(false);
             setAuditTarget(null);
+          }}
+        />
+      )}
+
+      {/* Expense Chat Modal */}
+      {showChatModal && chatExpense && (
+        <ExpenseChatModal
+          expense={chatExpense}
+          currentUser={user}
+          onClose={() => {
+            setShowChatModal(false);
+            setChatExpense(null);
           }}
         />
       )}

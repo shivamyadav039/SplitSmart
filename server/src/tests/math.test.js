@@ -185,4 +185,43 @@ describe('ExpenseSync Ledger Math & Parser Tests', () => {
       })
     ).rejects.toThrow('was not active in the group on this date');
   });
+
+  it('Can post comments to an expense and retrieve them chronologically', async () => {
+    const { createComment, getCommentsForExpense } = await import('../services/comments.service.js');
+    
+    // Create an expense to comment on
+    const expenseRes = await createExpense({
+      groupId: testGroupId,
+      description: 'Dinner to chat',
+      amount: 150.00,
+      currency: 'INR',
+      expenseDate: '2026-02-20',
+      paidBy: userA,
+      splitType: 'equal',
+      participants: [
+        { userId: userA },
+        { userId: userB }
+      ]
+    });
+
+    expect(expenseRes.success).toBe(true);
+
+    // Post comment 1 from UserA
+    const c1 = await createComment(expenseRes.id, userA, 'Hey B, please double check this bill.');
+    expect(c1.id).toBeDefined();
+    expect(c1.message).toBe('Hey B, please double check this bill.');
+    expect(c1.user_name).toBe('UserA');
+
+    // Post comment 2 from UserB
+    const c2 = await createComment(expenseRes.id, userB, 'Looks good to me!');
+    expect(c2.id).toBeDefined();
+    expect(c2.message).toBe('Looks good to me!');
+    expect(c2.user_name).toBe('UserB');
+
+    // Fetch comments
+    const list = await getCommentsForExpense(expenseRes.id);
+    expect(list.length).toBe(2);
+    expect(list[0].message).toBe('Hey B, please double check this bill.');
+    expect(list[1].message).toBe('Looks good to me!');
+  });
 });

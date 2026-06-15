@@ -10,6 +10,7 @@ import groupsRouter from './src/routes/groups.routes.js';
 import expensesRouter from './src/routes/expenses.routes.js';
 import paymentsRouter from './src/routes/payments.routes.js';
 import importRouter from './src/routes/import.routes.js';
+import commentsRouter from './src/routes/comments.routes.js';
 
 // Import error middleware
 import { errorMiddleware } from './src/middleware/error.middleware.js';
@@ -38,6 +39,7 @@ app.use('/api/groups', groupsRouter);
 app.use('/api/expenses', expensesRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/import', importRouter);
+app.use('/api/expenses/:expenseId/comments', commentsRouter);
 
 // Serve Static Assets in production
 const __filename = fileURLToPath(import.meta.url);

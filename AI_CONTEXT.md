@@ -131,6 +131,15 @@ CREATE TABLE IF NOT EXISTS import_logs (
     action_taken VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Expense Comments Table (User chat in an expense)
+CREATE TABLE IF NOT EXISTS expense_comments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    expense_id UUID NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ---
@@ -156,6 +165,8 @@ CREATE TABLE IF NOT EXISTS import_logs (
 * **GET `/api/groups/:id/balances`** — Response (200): `{ debts: [{ debtor_id, debtor_name, creditor_id, creditor_name, amount }], summaries: [{ user_id, name, net_balance }] }`
 * **GET `/api/groups/:id/expenses/audit/:userId`** — Response (200): `[{ id, type, date, description, total_amount, user_share, paid_by_name }]`
 * **POST `/api/payments`** — Request: `{ groupId, paidBy, paidTo, amount, paymentDate, notes }` $\rightarrow$ Response (201): `{ id, success: true }`
+* **GET `/api/expenses/:expenseId/comments`** — Response (200): `{ comments: [{ id, expense_id, user_id, message, created_at, user_name, user_email }] }`
+* **POST `/api/expenses/:expenseId/comments`** — Request: `{ message }` $\rightarrow$ Response (201): `{ comment: { id, expense_id, user_id, message, created_at, user_name } }`
 
 ### CSV Importer
 * **POST `/api/import/parse`** — Upload: `file` multipart $\rightarrow$ Response (200): `{ importSessionId, anomalies: [{ rowNumber, description, anomalies: [...] }] }`

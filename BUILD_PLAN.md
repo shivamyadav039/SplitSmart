@@ -61,12 +61,14 @@ graph LR
 * **split_metadata**: Retains original raw entries (percentage weights, share ratios) for history checks.
 * **payments**: Payment transaction records between members.
 * **import_logs**: Session audit logs documenting CSV parsing.
+* **expense_comments**: Relational table storing comments, messages, and timestamps linked to specific expenses.
 
 ### API Design
 Standardized JSON payload routing. All endpoints return predictable, typed parameters:
 * Auth routes (`/api/auth/*`) handle registrations and logins.
 * Ledger routes (`/api/groups/:id/balances`, `/api/groups/:id/expenses/audit/:userId`) compute debt matrices on the fly.
 * Importer endpoints (`/api/import/parse`, `/api/import/confirm`) isolate file buffer checks from final database commits.
+* Expense Chat routes (`/api/expenses/:expenseId/comments`) query and append text comments to individual expenses.
 
 ---
 
@@ -107,5 +109,5 @@ The [AI_CONTEXT.md](file:///Users/shivamyadav/splitwise_Clone/AI_CONTEXT.md) doc
 
 ### What We Avoided
 * **Heavy Queue Engines**: Avoided installing background messaging systems (like RabbitMQ or Redis queues) to handle CSV imports. Multer's in-memory storage buffer parses files on the fly, keeping deployment footprints small and fully compatible with Vercel's serverless environment.
-* **WebSockets**: Avoided Socket.io real-time push events, relying instead on API triggers to reload ledger views, as WebSockets are not natively supported by standard Vercel serverless containers.
+* **WebSockets (Serverless Friendly Real-Time Chat)**: Avoided Socket.io real-time push events, relying instead on client-side short polling (refreshing comments every 3 seconds while active) against the PostgreSQL `expense_comments` table. This achieves real-time synchronization using standard stateless HTTP endpoints, matching the Vercel serverless constraints and resolving the user's relational DB criteria without stateful TCP overhead.
 

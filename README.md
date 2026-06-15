@@ -8,9 +8,9 @@ ExpenseSync is a shared expenses management application designed for flatmates a
 
 ### Prerequisites
 * Node.js (v20+ recommended)
-* PostgreSQL database instance running locally
+* PostgreSQL database instance running locally or hosted on Neon/Supabase
 
-### Database Configuration
+### Local Development Setup
 1. Make sure your local PostgreSQL service is running.
 2. In [server/.env](file:///Users/shivamyadav/splitwise_Clone/server/.env), configure your PostgreSQL connection string:
    ```env
@@ -19,25 +19,47 @@ ExpenseSync is a shared expenses management application designed for flatmates a
    PORT=5001
    DEMO_MODE=true
    ```
-
-### Execution Steps
-From the root workspace directory, run:
-
-1. **Install all dependencies:**
+3. **Install all dependencies:**
+   From the root workspace directory, run:
    ```bash
    npm run install:all
    ```
-2. **Execute migrations & seed data:**
+4. **Execute migrations & seed data:**
    This creates the tables and seeds initial users (Aisha, Rohan, Priya, Sam, Meera, Dev) and memberships:
    ```bash
    npm run --prefix server migrate && npm run --prefix server seed
    ```
-3. **Start client & server concurrently:**
+5. **Start client & server concurrently:**
    ```bash
    npm run dev
    ```
    * Frontend: `http://localhost:5173/`
    * Backend API: `http://localhost:5001/`
+
+### Production Deployment (Vercel & Neon)
+This monorepo is pre-configured for deployment to Vercel with a hosted serverless database:
+
+1. **Database Setup**:
+   * Spin up a PostgreSQL instance on **[Neon](https://neon.tech/)** or **Supabase**.
+   * Retrieve the pooled database connection string.
+2. **Run Production Migrations & Seeding**:
+   Before deploying, populate the tables in your production database by running the migration and seed scripts locally (ensure your local `server/.env` is temporarily pointed to your production `DATABASE_URL`):
+   ```bash
+   npm run --prefix server migrate
+   npm run --prefix server seed
+   ```
+3. **Deploy to Vercel**:
+   * Connect your GitHub repository to Vercel.
+   * Make sure the **Root Directory** in Vercel settings is set to the project root (empty or `./`), **NOT** the `client` directory.
+   * Configure the **Build & Development Settings**:
+     * **Build Command**: `npm run build`
+     * **Output Directory**: `client/dist`
+   * Add the following **Environment Variables** in Vercel:
+     * `DATABASE_URL` (your Neon pooled database connection string)
+     * `JWT_SECRET` (your secure JWT token signing key)
+     * `NODE_ENV=production`
+     * `USD_TO_INR_RATE=84`
+   * Toggle **Deployment Protection** to **Disabled** in your Vercel Project Settings -> Security tab to allow public access.
 
 ---
 
@@ -197,4 +219,10 @@ To transition this MVP to a fully commercialized application, the following arch
 - [ ] **Recharts Spending Visualizations**: Build interactive dashboard analytics including spending breakups (category distribution), personal cumulative balance history over time, and monthly expense trends.
 - [ ] **Stripe / Razorpay Settlement Sandbox**: Implement a direct "Settle Up" trigger allowing flatmates to execute payments electronically within the app using UPI or Cards.
 - [ ] **Real-time Push Notifications**: Use WebSockets (Socket.io) or WebPush to alert members instantly when expenses are added, settlements are recorded, or when they are added to a new flatmates group.
+
+---
+
+## 6. AI Development & Assistance
+
+This project was built and optimized with the assistance of **Antigravity**, a powerful agentic AI coding assistant designed by the **Google DeepMind** team working on Advanced Agentic Coding. Antigravity assisted in writing backend routes, designing clean schema migrations, configuring transaction flows, and setting up the monorepo structures for local and serverless Vercel deployments.
 

@@ -10,6 +10,15 @@ ExpenseSync is a shared expenses management application designed for flatmates a
 * Node.js (v20+ recommended)
 * PostgreSQL database instance running locally or hosted on Neon/Supabase
 
+### ⚡ Quick Start (Copy & Paste Setup)
+If you already have a local PostgreSQL instance running and a database named `splitwise` created (or want to connect to a hosted one), run this single chain of commands in your terminal to set up and start the application:
+
+```bash
+# Copy env, install all dependencies, run migrations, seed dummy data, and start dev server
+cp server/.env.example server/.env && npm run install:all && npm run --prefix server migrate && npm run --prefix server seed && npm run dev
+```
+*(Note: If your local PostgreSQL credentials differ from the defaults, edit the `DATABASE_URL` inside [server/.env](file:///Users/shivamyadav/splitwise_Clone/server/.env) before running migrations).*
+
 ### Local Development Setup
 1. Make sure your local PostgreSQL service is running and you have created a database (e.g., named `splitwise`).
 2. Copy the example environment template to create your `.env` file:

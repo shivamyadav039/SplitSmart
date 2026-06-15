@@ -11,11 +11,15 @@ ExpenseSync is a shared expenses management application designed for flatmates a
 * PostgreSQL database instance running locally or hosted on Neon/Supabase
 
 ### Local Development Setup
-1. Make sure your local PostgreSQL service is running.
-2. In [server/.env](file:///Users/shivamyadav/splitwise_Clone/server/.env), configure your PostgreSQL connection string:
+1. Make sure your local PostgreSQL service is running and you have created a database (e.g., named `splitwise`).
+2. Copy the example environment template to create your `.env` file:
+   ```bash
+   cp server/.env.example server/.env
+   ```
+3. Open [server/.env](file:///Users/shivamyadav/splitwise_Clone/server/.env) and configure your database connection string and settings:
    ```env
-   DATABASE_URL=postgresql://localhost:5432/splitwise
-   JWT_SECRET=demo_secret_key_123_super_secure
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/splitwise
+   JWT_SECRET=your_jwt_secret_key_change_me_in_production
    PORT=5001
    DEMO_MODE=true
    ```

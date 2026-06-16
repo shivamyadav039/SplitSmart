@@ -101,8 +101,8 @@ export const ImportCSV = () => {
         // Pre-initialize resolutions state for each anomaly row
         const initialResolutions = {};
         anomalies.forEach(row => {
-          // Default first action
-          const mainAnomaly = row.anomalies[0];
+          // Default to the first anomaly that requires user choice, or fallback to the first anomaly
+          const mainAnomaly = row.anomalies.find(a => a.options && a.options.length > 0) || row.anomalies[0];
           initialResolutions[row.rowNumber] = {
             rowNumber: row.rowNumber,
             issueType: mainAnomaly.type,
@@ -229,17 +229,26 @@ export const ImportCSV = () => {
       {/* STAGE 2: REVIEW ANOMALIES */}
       {stage === 'review' && (
         <div className="space-y-6">
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm flex items-center space-x-3">
-            <AlertTriangle size={20} />
-            <span>
-              We found <strong>{anomaliesQueue.length}</strong> rows containing anomalies. Please choose resolutions below.
-            </span>
+          {/* Step-by-step instructions card */}
+          <div className="glass-card p-6 rounded-2xl border border-amber-500/20 space-y-4">
+            <div className="flex items-center space-x-3 text-amber-400">
+              <AlertTriangle size={20} />
+              <span className="font-bold text-sm">
+                Resolving Anomalies Step-by-Step ({anomaliesQueue.length} Issues Found)
+              </span>
+            </div>
+            <ol className="list-decimal pl-5 text-xs text-gray-300 space-y-2 leading-relaxed">
+              <li>Review each flagged row below. The description and detected issues are listed for your reference.</li>
+              <li>For each issue, select the appropriate resolution from the <strong>Action</strong> dropdown.</li>
+              <li>If required, provide additional input (e.g., choose a member from the dropdown or select a date).</li>
+              <li>Once all rows have a resolution selected, click the <strong>Commit Import Resolutions</strong> button at the bottom.</li>
+            </ol>
           </div>
 
           <div className="space-y-6">
             {anomaliesQueue.map((row) => {
               const rowRes = resolutions[row.rowNumber] || {};
-              const mainAnomaly = row.anomalies[0];
+              const mainAnomaly = row.anomalies.find(a => a.options && a.options.length > 0) || row.anomalies[0];
 
               return (
                 <div key={row.rowNumber} className="glass-card rounded-2xl p-6 space-y-4 border-l-4 border-l-amber-500">

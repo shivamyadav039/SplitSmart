@@ -184,7 +184,7 @@ export const SettlementModal = ({ groupId: initialGroupId, members: initialMembe
               className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#06B6D4] transition-colors"
             >
               <option value="" disabled className="bg-[#0f172a]">Select sender...</option>
-              {members.map((m) => (
+              {groupMembers.map((m) => (
                 <option key={m.user_id} value={m.user_id} className="bg-[#0f172a]">
                   {m.name} {m.user_id === currentUser?.id ? '(You)' : ''}
                 </option>

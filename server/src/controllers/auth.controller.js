@@ -20,6 +20,16 @@ export async function login(req, res, next) {
   }
 }
 
+export async function googleLogin(req, res, next) {
+  try {
+    const { idToken } = req.body;
+    const result = await authService.loginWithGoogle(idToken);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 export async function getMe(req, res, next) {
   try {
     const user = await authService.getUserById(req.user.id);

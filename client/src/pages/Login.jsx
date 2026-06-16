@@ -4,13 +4,50 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { LogIn, Key, Mail, UserCheck, Plane, Home as HomeIcon, Heart, Asterisk, Sparkles } from 'lucide-react';
 
 export const Login = () => {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleAvailable, setGoogleAvailable] = useState(false);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setError('');
+    setLoading(true);
+    try {
+      await googleLogin(response.credential);
+      navigate(from, { replace: true });
+    } catch (err) {
+      let details = err.response?.data?.error || err.response?.data?.details || err.message;
+      if (typeof details === 'object' && details !== null) {
+        details = details.message || JSON.stringify(details);
+      }
+      setError(`Google Sign-In failed. Details: ${details}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (googleClientId && window.google) {
+      setGoogleAvailable(true);
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCredentialResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: '380px' }
+        );
+      } catch (err) {
+        console.error('Failed to render Google button:', err);
+      }
+    }
+  }, []);
 
   // Rotating showcase text
   const [activeWordIndex, setActiveWordIndex] = useState(0);
@@ -246,18 +283,25 @@ export const Login = () => {
             <div className="flex-grow border-t border-gray-150"></div>
           </div>
 
-          <button
-            onClick={() => alert('Google SSO is simulated. Please select a demo user below for instant swappable login.')}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 bg-white font-bold text-xs text-gray-600 transition-all cursor-pointer hover-lift shadow-sm"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#EA4335"
-                d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.477 0-6.3-2.823-6.3-6.3s2.823-6.3 6.3-6.3c1.63 0 3.106.623 4.22 1.637l3.13-3.13C19.16 2.502 15.89 1.1 12.24 1.1 6.138 1.1 1.1 6.138 1.1 12.24s5.038 11.14 11.14 11.14c6.12 0 11.12-5.02 11.12-11.12 0-.672-.06-1.32-.178-1.975H12.24z"
-              />
-            </svg>
-            <span>Sign in with Google</span>
-          </button>
+          {googleAvailable ? (
+            <div className="flex justify-center w-full min-h-[40px]">
+              <div id="google-signin-btn"></div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => alert('To use Google Sign-In, please configure the VITE_GOOGLE_CLIENT_ID environment variable in your Vercel or local environment settings.')}
+              className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 bg-white font-bold text-xs text-gray-600 transition-all cursor-pointer hover-lift shadow-sm"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#EA4335"
+                  d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.477 0-6.3-2.823-6.3-6.3s2.823-6.3 6.3-6.3c1.63 0 3.106.623 4.22 1.637l3.13-3.13C19.16 2.502 15.89 1.1 12.24 1.1 6.138 1.1 1.1 6.138 1.1 12.24s5.038 11.14 11.14 11.14c6.12 0 11.12-5.02 11.12-11.12 0-.672-.06-1.32-.178-1.975H12.24z"
+                />
+              </svg>
+              <span>Sign in with Google</span>
+            </button>
+          )}
 
           {/* Quick Demo Persona Switcher */}
           <div className="border-t border-gray-100 pt-5 space-y-3.5">

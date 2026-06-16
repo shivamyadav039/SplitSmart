@@ -114,3 +114,61 @@ export async function createUser(name, email) {
   );
   return insertRes.rows[0];
 }
+
+export async function loginWithGoogle(idToken) {
+  if (!idToken) {
+    throw new Error('Google ID token is required.');
+  }
+
+  // Verify token via Google API tokeninfo endpoint
+  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+  if (!verifyRes.ok) {
+    const errText = await verifyRes.text();
+    console.error('Google token verification failed:', errText);
+    throw new Error('Failed to verify Google ID token.');
+  }
+
+  const payload = await verifyRes.json();
+  
+  // Verify client ID if GOOGLE_CLIENT_ID is configured in environment
+  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+  if (GOOGLE_CLIENT_ID && payload.aud !== GOOGLE_CLIENT_ID) {
+    throw new Error('Google token audience mismatch.');
+  }
+
+  const { email, name, email_verified } = payload;
+  if (!email_verified) {
+    throw new Error('Google email is not verified.');
+  }
+
+  // 1. Check if user already exists
+  const checkRes = await pool.query(
+    'SELECT id, name, email, created_at FROM users WHERE email = $1',
+    [email]
+  );
+
+  let user;
+  if (checkRes.rows.length > 0) {
+    user = checkRes.rows[0];
+  } else {
+    // 2. Register new user automatically
+    // Generate a secure random password since they use Google SSO
+    const passwordHash = await bcrypt.hash(Math.random().toString(36), 10);
+    const insertRes = await pool.query(
+      `INSERT INTO users (name, email, password_hash)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, email, created_at`,
+      [name || email.split('@')[0], email, passwordHash]
+    );
+    user = insertRes.rows[0];
+  }
+
+  // Sign local JWT
+  const token = jwt.sign(
+    { id: user.id, name: user.name, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  return { token, user };
+}

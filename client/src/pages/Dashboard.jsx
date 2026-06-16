@@ -145,7 +145,10 @@ export const Dashboard = () => {
       await login(demoEmail, demoPassword);
     } catch (err) {
       console.error('Failed switching user:', err);
-      const details = err.response?.data?.error || err.response?.data?.details || err.message;
+      let details = err.response?.data?.error || err.response?.data?.details || err.message;
+      if (typeof details === 'object' && details !== null) {
+        details = details.message || JSON.stringify(details);
+      }
       alert(`Could not switch to ${persona}. Details: ${details}`);
     } finally {
       setSwitchingUser(false);

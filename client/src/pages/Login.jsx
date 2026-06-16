@@ -62,7 +62,10 @@ export const Login = () => {
       await login(demoEmail, demoPassword);
       navigate(from, { replace: true });
     } catch (err) {
-      const details = err.response?.data?.error || err.response?.data?.details || err.message;
+      let details = err.response?.data?.error || err.response?.data?.details || err.message;
+      if (typeof details === 'object' && details !== null) {
+        details = details.message || JSON.stringify(details);
+      }
       setError(`Failed to log in as ${persona}. Details: ${details}`);
     } finally {
       setLoading(false);

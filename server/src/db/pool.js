@@ -17,16 +17,11 @@ if (!connectionString) {
 const cleanConnectionString = connectionString ? connectionString.split('?')[0] : '';
 const useSSL = cleanConnectionString && !cleanConnectionString.includes('localhost') && !cleanConnectionString.includes('127.0.0.1') && !cleanConnectionString.includes('::1');
 
-let poolConfig = {};
+let poolConfig;
 
 if (useSSL) {
-  const dbUrl = new URL(connectionString);
   poolConfig = {
-    host: dbUrl.hostname,
-    port: dbUrl.port || 5432,
-    database: dbUrl.pathname.slice(1),
-    user: dbUrl.username,
-    password: decodeURIComponent(dbUrl.password),
+    connectionString: connectionString,
     ssl: { rejectUnauthorized: false },
   };
 } else {

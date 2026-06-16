@@ -145,7 +145,8 @@ export const Dashboard = () => {
       await login(demoEmail, demoPassword);
     } catch (err) {
       console.error('Failed switching user:', err);
-      alert(`Could not switch to ${persona}. Please check seeding.`);
+      const details = err.response?.data?.error || err.response?.data?.details || err.message;
+      alert(`Could not switch to ${persona}. Details: ${details}`);
     } finally {
       setSwitchingUser(false);
     }

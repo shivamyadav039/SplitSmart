@@ -19,12 +19,33 @@ import { seed } from './src/db/seed.js';
 
 dotenv.config();
 
-// Run database migrations and seed asynchronously on startup
-runMigrations()
-  .then(() => seed())
-  .catch((err) => {
-    console.error('Database setup failed on startup:', err.message);
-  });
+// Ensure database migrations and seed are run and awaited
+let dbSetupPromise = null;
+let dbSetupComplete = false;
+
+export async function ensureDbSetup() {
+  if (dbSetupComplete) return;
+  if (!dbSetupPromise) {
+    dbSetupPromise = (async () => {
+      try {
+        console.log('Starting database setup (migrations & seed)...');
+        await runMigrations();
+        await seed();
+        dbSetupComplete = true;
+        console.log('Database setup completed successfully!');
+      } catch (err) {
+        dbSetupPromise = null; // Reset promise on failure to allow retry on next request
+        throw err;
+      }
+    })();
+  }
+  return dbSetupPromise;
+}
+
+// Trigger startup DB setup asynchronously (non-blocking for startup itself)
+ensureDbSetup().catch((err) => {
+  console.error('Database setup failed on startup:', err.message);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +53,20 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Block and ensure DB setup is finished before handling any incoming API requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbSetup();
+    next();
+  } catch (err) {
+    console.error('Database setup failed on request:', err.message);
+    res.status(500).json({ 
+      error: 'Database setup in progress or failed. Please refresh the page.',
+      details: err.message 
+    });
+  }
+});
 
 // API Routes
 app.use('/api/auth', authRouter);

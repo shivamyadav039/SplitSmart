@@ -62,7 +62,8 @@ export const Login = () => {
       await login(demoEmail, demoPassword);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(`Failed to log in as ${persona}. Ensure the database is seeded.`);
+      const details = err.response?.data?.error || err.response?.data?.details || err.message;
+      setError(`Failed to log in as ${persona}. Details: ${details}`);
     } finally {
       setLoading(false);
     }

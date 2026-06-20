@@ -43,9 +43,11 @@ export async function ensureDbSetup() {
 }
 
 // Trigger startup DB setup asynchronously (non-blocking for startup itself)
-ensureDbSetup().catch((err) => {
-  console.error('Database setup failed on startup:', err.message);
-});
+if (!process.env.VERCEL) {
+  ensureDbSetup().catch((err) => {
+    console.error('Database setup failed on startup:', err.message);
+  });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -80,7 +82,7 @@ app.use('/api/expenses/:expenseId/comments', commentsRouter);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
   const distPath = path.join(__dirname, '../client/dist');
   app.use(express.static(distPath));
   

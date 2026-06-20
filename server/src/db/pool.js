@@ -34,7 +34,7 @@ if (useSSL) {
 export const pool = new Pool(poolConfig);
 
 // Test database connection on startup
-if (connectionString) {
+if (connectionString && !process.env.VERCEL) {
   pool
     .connect()
     .then((client) => {

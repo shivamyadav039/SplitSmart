@@ -121,7 +121,7 @@ export async function loginWithGoogle(idToken) {
   }
 
   // Verify token via Google API tokeninfo endpoint
-  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
   if (!verifyRes.ok) {
     const errText = await verifyRes.text();
     console.error('Google token verification failed:', errText);
@@ -154,11 +154,21 @@ export async function loginWithGoogle(idToken) {
     // 2. Register new user automatically
     // Generate a secure random password since they use Google SSO
     const passwordHash = await bcrypt.hash(Math.random().toString(36), 10);
+    
+    // Ensure unique name
+    let finalName = name || email.split('@')[0];
+    const nameCheck = await pool.query('SELECT id FROM users WHERE name = $1', [finalName]);
+    if (nameCheck.rows.length > 0) {
+      // Append a random 4-digit number to guarantee uniqueness
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      finalName = `${finalName}_${randomSuffix}`;
+    }
+
     const insertRes = await pool.query(
       `INSERT INTO users (name, email, password_hash)
        VALUES ($1, $2, $3)
        RETURNING id, name, email, created_at`,
-      [name || email.split('@')[0], email, passwordHash]
+      [finalName, email, passwordHash]
     );
     user = insertRes.rows[0];
   }

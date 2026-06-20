@@ -31,22 +31,44 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (googleClientId && window.google) {
-      setGoogleAvailable(true);
-      try {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredentialResponse,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('google-signin-btn'),
-          { theme: 'outline', size: 'large', width: '380px' }
-        );
-      } catch (err) {
-        console.error('Failed to render Google button:', err);
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.replace(/^["']|["']$/g, '');
+    if (!googleClientId) return;
+
+    let checkInterval;
+    const initializeGoogleBtn = () => {
+      if (window.google) {
+        setGoogleAvailable(true);
+        if (checkInterval) clearInterval(checkInterval);
+        try {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: handleGoogleCredentialResponse,
+          });
+          const btnElem = document.getElementById('google-signin-btn');
+          if (btnElem) {
+            window.google.accounts.id.renderButton(
+              btnElem,
+              { theme: 'outline', size: 'large', width: '380px' }
+            );
+          }
+        } catch (err) {
+          console.error('Failed to render Google button:', err);
+        }
       }
+    };
+
+    initializeGoogleBtn();
+
+    if (!window.google) {
+      checkInterval = setInterval(initializeGoogleBtn, 100);
+      setTimeout(() => {
+        if (checkInterval) clearInterval(checkInterval);
+      }, 10000);
     }
+
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+    };
   }, []);
 
   // Rotating showcase text
@@ -283,9 +305,12 @@ export const Login = () => {
             <div className="flex-grow border-t border-gray-150"></div>
           </div>
 
-          {googleAvailable ? (
-            <div className="flex justify-center w-full min-h-[40px]">
-              <div id="google-signin-btn"></div>
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+            <div className="flex flex-col items-center justify-center w-full min-h-[40px]">
+              <div id="google-signin-btn" className={googleAvailable ? "block" : "hidden"}></div>
+              {!googleAvailable && (
+                <div className="text-xs text-gray-400 animate-pulse py-2">Loading Google Sign-in...</div>
+              )}
             </div>
           ) : (
             <button

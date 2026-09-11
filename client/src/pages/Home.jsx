@@ -713,8 +713,7 @@ export const Home = () => {
 
       {/* Footer */}
       <footer className="bg-white py-8 px-6 text-center text-xs text-gray-400">
-        <p>© 2026 ExpenseSync. All rights reserved.</p>
-        <p className="mt-1">Developed as a high-fidelity Clone assignment.</p>
+        <p>© {new Date().getFullYear()} ExpenseSync. Built by Shivam Yadav.</p>
       </footer>
     </div>
   );

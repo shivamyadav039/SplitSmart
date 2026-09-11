@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "Backend server for ExpenseSync Clone",
+  "description": "Backend server for ExpenseSync",
   "main": "index.js",
   "type": "module",
   "scripts": {
